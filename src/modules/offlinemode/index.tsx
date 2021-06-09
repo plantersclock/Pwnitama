@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { getTypeParameterOwner, isTemplateExpression } from "typescript";
 import CurrentPlayerCards from "../cards/CurrentPlayerCards";
 import GameBoard from "../gameboard";
@@ -32,6 +32,38 @@ interface IGameState {
 //   selectedPiece?: string;
 // }
 
+const addToChar = (c: string, n: number) => {
+  return String.fromCharCode(c.charCodeAt(0) + n);
+};
+
+const removeFromChar = (c: string, n: number) => {
+  return String.fromCharCode(c.charCodeAt(0) - n);
+};
+
+const getMoveableSpaces = (
+  piece: string | undefined,
+  player: number,
+  moveOptions: IMove["selectedMoveOptions"]
+) => {
+  if (!piece) return;
+  if (!moveOptions) return;
+
+  const moveableSpaces = moveOptions.map((move) => {
+    let moveableSpace;
+    if (player === 1) {
+      moveableSpace =
+        addToChar(piece[0], move.x) + (Number(piece[1]) + move.y).toString();
+    } else {
+      moveableSpace =
+        removeFromChar(piece[0], move.x) +
+        (Number(piece[1]) - move.y).toString();
+    }
+
+    return moveableSpace;
+  });
+  return moveableSpaces;
+};
+
 const OfflineMode: FC = (): JSX.Element => {
   const [gameState, setGameState] = useState<IGameState>({
     board: {
@@ -52,37 +84,16 @@ const OfflineMode: FC = (): JSX.Element => {
   const [selectedMove, setSelectedMove] = useState<IMove>();
 
   const [selectedPiece, setSelectedPiece] = useState<string>();
-  const [moveableSpaces, setMoveableSpaces] = useState<Array<string>>();
 
-  const addToChar = (c: string, n: number) => {
-    return String.fromCharCode(c.charCodeAt(0) + n);
-  };
-
-  const removeFromChar = (c: string, n: number) => {
-    return String.fromCharCode(c.charCodeAt(0) - n);
-  };
-
-  useEffect(() => {
-    if (!selectedPiece) return;
-    if (!selectedMove?.selectedMoveOptions) return;
-
-    const moveableSpaces = selectedMove?.selectedMoveOptions.map((move) => {
-      let moveableSpace;
-      if (gameState.currentPlayer === 1) {
-        moveableSpace =
-          addToChar(selectedPiece[0], move.x) +
-          (Number(selectedPiece[1]) + move.y).toString();
-      } else {
-        moveableSpace =
-          removeFromChar(selectedPiece[0], move.x) +
-          (Number(selectedPiece[1]) - move.y).toString();
-      }
-
-      return moveableSpace;
-    });
-
-    setMoveableSpaces(moveableSpaces);
-  }, [selectedMove, selectedPiece]);
+  const moveableSpaces = useMemo(
+    () =>
+      getMoveableSpaces(
+        selectedPiece,
+        gameState.currentPlayer,
+        selectedMove?.selectedMoveOptions
+      ),
+    [selectedPiece, gameState.currentPlayer, selectedMove?.selectedMoveOptions]
+  );
 
   const handleCardClick = (options: IMove["selectedMoveOptions"]) => {
     setSelectedMove({ ...selectedMove, selectedMoveOptions: options });
@@ -108,7 +119,7 @@ const OfflineMode: FC = (): JSX.Element => {
       board: { ...boardStateWithoutSelected, ...newBoardState },
     });
     setSelectedPiece("");
-    setMoveableSpaces([]);
+
     setSelectedMove({});
   };
 
