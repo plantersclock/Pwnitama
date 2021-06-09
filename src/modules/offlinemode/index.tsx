@@ -1,5 +1,5 @@
-import { FC, useEffect, useMemo, useState } from "react";
-import { getTypeParameterOwner, isTemplateExpression } from "typescript";
+import { FC, useMemo, useState } from "react";
+
 import CurrentPlayerCards from "../cards/CurrentPlayerCards";
 import GameBoard from "../gameboard";
 
@@ -23,14 +23,6 @@ interface IGameState {
   board: IBoardState;
   currentPlayer: number;
 }
-
-// interface IMoveableSpaces {
-//   moveableSpaces?: string[];
-// }
-
-// interface ISelectedPiece {
-//   selectedPiece?: string;
-// }
 
 const addToChar = (c: string, n: number) => {
   return String.fromCharCode(c.charCodeAt(0) + n);
