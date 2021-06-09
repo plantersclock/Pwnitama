@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { getTypeParameterOwner, isTemplateExpression } from "typescript";
+import CurrentPlayerCards from "../cards/CurrentPlayerCards";
 import GameBoard from "../gameboard";
 
 interface IMove {
@@ -48,12 +49,7 @@ const OfflineMode: FC = (): JSX.Element => {
     currentPlayer: 1,
   });
 
-  const [selectedMove, setSelectedMove] = useState<IMove>({
-    selectedMoveOptions: [
-      { x: 1, y: 1 },
-      { x: 0, y: 2 },
-    ],
-  });
+  const [selectedMove, setSelectedMove] = useState<IMove>();
 
   const [selectedPiece, setSelectedPiece] = useState<string>();
   const [moveableSpaces, setMoveableSpaces] = useState<Array<string>>();
@@ -88,6 +84,10 @@ const OfflineMode: FC = (): JSX.Element => {
     setMoveableSpaces(moveableSpaces);
   }, [selectedMove, selectedPiece]);
 
+  const handleCardClick = (options: IMove["selectedMoveOptions"]) => {
+    setSelectedMove({ ...selectedMove, selectedMoveOptions: options });
+  };
+
   // choseMoveLocation is the allowable space that was clicked for the piece to move. ie "a2" or "b3" etc
   const handleMove = (chosenMoveLocation: string) => {
     if (!selectedPiece) return;
@@ -109,6 +109,7 @@ const OfflineMode: FC = (): JSX.Element => {
     });
     setSelectedPiece("");
     setMoveableSpaces([]);
+    setSelectedMove({});
   };
 
   return (
@@ -129,6 +130,7 @@ const OfflineMode: FC = (): JSX.Element => {
         selectedPiece={selectedPiece}
         moveableSpaces={moveableSpaces}
       />
+      <CurrentPlayerCards handleCardClick={handleCardClick} />
     </div>
   );
 };
